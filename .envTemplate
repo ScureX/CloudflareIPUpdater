@@ -1,0 +1,3 @@
+RECORDS='{"record_name": "record_identifier"}'
+API_TOKEN='cloudflare_api_key'
+ZONE_ID='zone_id_of_website_on_cloudflare'
