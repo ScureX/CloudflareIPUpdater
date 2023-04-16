@@ -56,7 +56,7 @@ def main():
     # Load environment variables from .env file
     load_dotenv(os.getcwd() + "/.env")
     # add logging
-    logging.basicConfig(filename='CloudflareIPChanger.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
+    logging.basicConfig(filename='CloudflareIPUpdater.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
 
     ZONE_ID, API_TOKEN, RECORDS, URL, API_URL = load_vars()
 
