@@ -3,6 +3,8 @@ import logging
 import json
 import os
 from dotenv import load_dotenv
+import telegram
+import asyncio
 
 
 def get_current_ip():
@@ -52,12 +54,22 @@ def load_vars():
     return ZONE_ID, API_TOKEN, RECORDS, URL, API_URL
 
 
+async def send_notification(bot, message):
+    id = os.getenv("TELEGRAM_CHAT_ID")
+    await bot.send_message(chat_id=id, text=message)
+
+
 def main():
     # Load environment variables from .env file
     load_dotenv(os.getcwd() + "/.env")
+    
     # add logging
     logging.basicConfig(filename='CloudflareIPUpdater.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
+    
+    # add notif bot
+    bot = telegram.Bot(token=os.getenv("TELEGRAM_API_KEY"))
 
+    # load github vars
     ZONE_ID, API_TOKEN, RECORDS, URL, API_URL = load_vars()
 
     # Check the domain status
@@ -68,12 +80,14 @@ def main():
         # if this is true find a new api to get ip
         if ip == None:
             logging.critical("Could not retrieve current IP address")
+            asyncio.run(send_notification(bot, "CRITICAL: Could not retrieve current IP address."))
             return
         
         for record_name in RECORDS:
             update_dns_record(ip, record_name, API_URL, API_TOKEN, ZONE_ID, RECORDS)
 
-        logging.warning("Updated DNS record with new IP address: {}".format(ip))
+        logging.warning(f"Updated DNS record with new IP address: {ip}")
+        asyncio.run(send_notification(bot, f"WARNING: Updated DNS record with new IP address: {ip}"))
     else:
         logging.info("Domain is responding correctly")
 
