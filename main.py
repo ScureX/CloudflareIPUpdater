@@ -1,10 +1,9 @@
 import requests
 import logging
-import os
-from dotenv import load_dotenv
 import telegram
 import asyncio
-from util import CFObject
+from util import CFObject, TelegramObject
+import platform
 
 
 def get_current_ip():
@@ -41,8 +40,8 @@ def check_domain_status(URL):
 
 
 async def send_notification(message):
-    bot = telegram.Bot(token=os.getenv("TELEGRAM_API_KEY"))
-    await bot.send_message(chat_id=os.getenv("TELEGRAM_CHAT_ID"), text=message)
+    bot = telegram.Bot(token=teleObj.token)
+    await bot.send_message(chat_id=teleObj.chat_id, text=message)
 
 
 def runLogic():
@@ -67,18 +66,20 @@ def runLogic():
 
 
 def load():
-    # Load environment variables from .env file
-    load_dotenv(os.getcwd() + '/.env')
-    
     # add logging
     logging.basicConfig(filename='CloudflareIPUpdater.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
 
-    # load github vars
+    # load cloudflare vars
     global cfObj
     cfObj = CFObject()
 
+    # load telegram vars
+    global teleObj
+    teleObj = TelegramObject()
+
     # windows has issues
-    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    if platform.system() == "Windows":
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
 def main():
